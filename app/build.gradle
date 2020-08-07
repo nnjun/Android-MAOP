@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'top.niunaijun.aop'
+//apply plugin: 'top.niunaijun.aop'
 
 android {
     compileSdkVersion 30
@@ -41,5 +41,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 //    implementation project(':AOP_api')
-    implementation "top.niunaijun.aop:MAOP_api:1.0.0"
+//    implementation "top.niunaijun.aop:MAOP_api:1.0.0"
 }
