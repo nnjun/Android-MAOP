@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Gradle: MAOP_core.MAOP_core-1.0.0">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/MAOP_core/build/libs/MAOP_core-1.0.0.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

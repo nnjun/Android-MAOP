@@ -1,4 +1,0 @@
-include ':MAOP_api'
-include ':MAOP_core'
-include ':app'
-rootProject.name = "Android-MAOP"
