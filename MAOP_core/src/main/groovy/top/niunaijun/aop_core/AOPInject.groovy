@@ -41,6 +41,7 @@ public class AOPInject {
                 String filePath = file.absolutePath
 //                println("filePath = " + filePath)
                 if (filePath.endsWith(".class")) {
+                    filePath = filePath.replace("\\", "/")
                     String className = filePath.split("/classes/")[1]
                             .replace("/", ".").replace(".class", "")
 //                    println("class = " + className)
