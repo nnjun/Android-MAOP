@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion 27
@@ -32,15 +33,15 @@ group='top.niunaijun.aop'
 version='1.0.0'
 
 //打包到本地或者远程Maven库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            //提交到远程服务器：
-            // repository(url: "http://www.xxx.com/repos") {
-            //    authentication(userName: "admin", password: "admin")
-            // }
-            //本地的Maven地址设置为E:/Maven
-            repository(url: uri('/Users/milk/Documents/works/localRepo'))
-        }
-    }
-}
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            //提交到远程服务器：
+//            // repository(url: "http://www.xxx.com/repos") {
+//            //    authentication(userName: "admin", password: "admin")
+//            // }
+//            //本地的Maven地址设置为E:/Maven
+//            repository(url: uri('../localRepo'))
+//        }
+//    }
+//}
