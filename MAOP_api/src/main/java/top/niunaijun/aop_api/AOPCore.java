@@ -1,8 +1,11 @@
 package top.niunaijun.aop_api;
 
+import android.content.Context;
+
 public class AOPCore {
 
     private static AOPListener sListener;
+    private static Context sContext;
 
     public static void register(AOPListener listener) {
         sListener = listener;
@@ -23,5 +26,13 @@ public class AOPCore {
             }
         }
         return false;
+    }
+
+    public static Context getContext() {
+        return sContext;
+    }
+
+    public static void setContext(Context context) {
+        sContext = context;
     }
 }

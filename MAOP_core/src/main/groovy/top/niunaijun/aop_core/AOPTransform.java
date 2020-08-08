@@ -93,6 +93,5 @@ public class AOPTransform extends Transform {
                 AOPInject.addJar(jarInput.getFile().getAbsolutePath());
             }
         }
-//        System.out.println("--------------结束transform了----------------");
     }
 }

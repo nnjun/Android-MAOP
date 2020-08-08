@@ -11,6 +11,10 @@ import javassist.bytecode.AccessFlag
 import org.gradle.api.Project
 import top.niunaijun.aop_api.annotations.Intercept
 import top.niunaijun.aop_api.annotations.Intercepts
+import top.niunaijun.aop_api.annotations.MAOPInit
+import top.niunaijun.aop_api.annotations.PrefAll
+import top.niunaijun.aop_api.annotations.PrefBoolean
+import top.niunaijun.aop_api.annotations.Storage
 import top.niunaijun.aop_api.annotations.TimeLog
 import top.niunaijun.aop_api.annotations.UIThread
 import top.niunaijun.aop_api.annotations.AsyncThread
@@ -32,6 +36,7 @@ public class AOPInject {
         pool.importPackage("android.os.Bundle");
         pool.importPackage("top.niunaijun.aop_api.AOPCore")
         pool.importPackage("top.niunaijun.aop_api.AOPThreadCore")
+        pool.importPackage("top.niunaijun.aop_api.AOPPrefCore")
 
 
         File dir = new File(path);
@@ -50,11 +55,23 @@ public class AOPInject {
                     if (ctClass.isFrozen())
                         ctClass.defrost()
                     boolean write = false
+
+                    if (ctClass.hasAnnotation(Storage.class)) {
+//                            PrefBoolean prefBoolean = it.getAnnotation(PrefBoolean.class)
+//                            it.setBody("""{return top.niunaijun.aop_api.AOPPrefCore.prefBoolean("${prefBoolean.name()}", "${prefBoolean.field()}", ${prefBoolean.def()});}""")
+                        createStorageBody(ctClass, ctClass.getAnnotation(Storage))
+                        write = true
+                    }
                     ctClass.getDeclaredMethods().each {
                         def orMethodName = it.name
+                        if (it.hasAnnotation(MAOPInit.class)) {
+                            println("AOP MAOPInit =====> " + className + ":" + it.name)
+                            it.insertBefore("top.niunaijun.aop_api.AOPCore.setContext(\$0);")
+                            write = true
+                        }
                         if (it.hasAnnotation(TimeLog.class)) {
                             println("AOP TimeLog =====> " + className + ":" + it.name)
-                            createProxyMethod(ctClass, it, TimeLog.class, it.name, createTimeLogBody(ctClass, it, orMethodName))
+                            createProxyMethod(ctClass, it, TimeLog.class, it.name, createTimeLogBody(ctClass, it))
                             write = true
                         }
                         if (it.hasAnnotation(UIThread.class)) {
@@ -71,7 +88,6 @@ public class AOPInject {
                         Intercept intercept = it.getAnnotation(Intercept.class)
                         if (intercept != null) {
                             String interceptStr = String.format(""" if(top.niunaijun.aop_api.AOPCore.intercept("%s")) return;""", intercept.name())
-                            //在方法开头插入代码
                             it.insertBefore(interceptStr)
                             println("AOP Intercept:" + intercept.name() + " =====> " + className + ":" + orMethodName)
                             write = true
@@ -81,7 +97,6 @@ public class AOPInject {
                         if (intercepts != null) {
                             String interceptStr = String.format(""" if(top.niunaijun.aop_api.AOPCore.intercept(%s)) return;""",
                                     ArrayToSrc(intercepts.names()))
-                            //在方法开头插入代码
                             it.insertBefore(interceptStr);
                             println("AOP Intercepts:" + intercepts.names().join(",") + " =====> " + className + ":" + orMethodName)
                             write = true
@@ -103,10 +118,10 @@ public class AOPInject {
         ctClass.addMethod(proxyMethod)
     }
 
-    private static String createTimeLogBody(CtClass ctClass, CtMethod ctMethod, String orMethodName) {
+    private static String createTimeLogBody(CtClass ctClass, CtMethod ctMethod) {
         //方法返回类型
         def returnType = ctMethod.returnType.name
-        def newName = orMethodName + "\$\$" + TimeLog.class.simpleName
+        def newName = ctMethod.name + "\$\$" + TimeLog.class.simpleName
 
         //生产的方法返回值
         def methodResult = "${newName}(\$\$);"
@@ -126,14 +141,20 @@ public class AOPInject {
         //方法返回类型
         def returnType = ctMethod.returnType.name
         if (!"void".equals(returnType)) {
+            ctClass.detach()
             throw new Exception("@UIThread是一个异步方法，方法返回值必须是void")
         }
         def newName = ctMethod.name + "\$\$" + UIThread.class.simpleName
+        def params = new String[ctMethod.parameterTypes.length]
+        ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
+            params[i] = entry.name
+        }
+        def paramStr = ArrayToSrc(params)
 
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
-                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(\"${ctClass.name}\", \"${newName}\", null, \$args);"
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(\"${ctClass.name}\", \"${newName}\", null, \$args, ${paramStr});"
                 :
-                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(\"${ctClass.name}\", \"${newName}\", this, \$args);"
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(\"${ctClass.name}\", \"${newName}\", this, \$args, ${paramStr});"
         return "{$methodResult}"
     }
 
@@ -141,17 +162,30 @@ public class AOPInject {
         //方法返回类型
         def returnType = ctMethod.returnType.name
         if (!"void".equals(returnType)) {
+            ctClass.detach()
             throw new Exception("@AsyncThread是一个异步方法，方法返回值必须是void")
         }
         def newName = ctMethod.name + "\$\$" + AsyncThread.class.simpleName
 
+        def params = new String[ctMethod.parameterTypes.length]
+        ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
+            params[i] = entry.name
+        }
+        def paramStr = ArrayToSrc(params)
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
-                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(\"${ctClass.name}\", \"${newName}\", null, \$args);"
+                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(\"${ctClass.name}\", \"${newName}\", null, \$args, ${paramStr});"
                 :
-                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(\"${ctClass.name}\", \"${newName}\", this, \$args);"
+                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(\"${ctClass.name}\", \"${newName}\", this, \$args, ${paramStr});"
         return "{$methodResult}"
     }
 
+    private static void createStorageBody(CtClass ctClass, Storage storage) {
+        def getStorageMethod = CtNewMethod.make("""public ${ctClass.name} getStorage() {return top.niunaijun.aop_api.AOPPrefCore.getStorage("${storage.name()}", "${ctClass.name}");} """, ctClass)
+        ctClass.addMethod(getStorageMethod)
+
+        def setStorageMethod = CtNewMethod.make("""public void setStorage() {top.niunaijun.aop_api.AOPPrefCore.setStorage(\$0, "${storage.name()}", "${ctClass.name}");} """, ctClass)
+        ctClass.addMethod(setStorageMethod)
+    }
 
     private static String ArrayToSrc(String[] strings) {
         List<String> newStr = new ArrayList<>()
