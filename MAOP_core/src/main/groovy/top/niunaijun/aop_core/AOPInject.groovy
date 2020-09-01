@@ -152,9 +152,9 @@ public class AOPInject {
         def paramStr = ArrayToSrc(params)
 
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
-                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(\"${ctClass.name}\", \"${newName}\", null, \$args, ${paramStr});"
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr});"
                 :
-                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(\"${ctClass.name}\", \"${newName}\", this, \$args, ${paramStr});"
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr});"
         return "{$methodResult}"
     }
 
@@ -173,9 +173,9 @@ public class AOPInject {
         }
         def paramStr = ArrayToSrc(params)
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
-                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(\"${ctClass.name}\", \"${newName}\", null, \$args, ${paramStr});"
+                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr});"
                 :
-                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(\"${ctClass.name}\", \"${newName}\", this, \$args, ${paramStr});"
+                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr});"
         return "{$methodResult}"
     }
 

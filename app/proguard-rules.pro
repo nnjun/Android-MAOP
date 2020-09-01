@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# maop
+-dontskipnonpubliclibraryclassmembers
+-printconfiguration
+-keep class top.niunaijun.aop_api.annotations** {*; }
+-keepclassmembers class * {
+    @top.niunaijun.aop_api.annotations.* <methods>;
+}
