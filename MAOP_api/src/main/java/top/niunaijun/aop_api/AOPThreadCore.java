@@ -13,7 +13,11 @@ public class AOPThreadCore {
     private static Handler sHandler = new Handler(Looper.getMainLooper());
 
     public static void runUIThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz) {
-        sHandler.post(new Runnable() {
+        runUIThread(clazz, method, target, args, paramClazz, 0);
+    }
+
+    public static void runUIThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz, long delay) {
+        sHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -28,6 +32,24 @@ public class AOPThreadCore {
                     e.printStackTrace();
                     throw new RuntimeException(e);
                 }
+            }
+        }, delay);
+    }
+
+    public static void delayAsyncThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz, final long delay) {
+        if (delay <= 0) {
+            runAsyncThread(clazz, method, target, args, paramClazz);
+            return;
+        }
+        sExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runAsyncThread(clazz, method, target, args, paramClazz);
             }
         });
     }

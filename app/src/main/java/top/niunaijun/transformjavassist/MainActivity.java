@@ -3,15 +3,13 @@ package top.niunaijun.transformjavassist;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import java.io.File;
 
-import top.niunaijun.aop_api.annotations.AsyncThread;
+import top.niunaijun.aop_api.annotations.DelayAsyncThread;
+import top.niunaijun.aop_api.annotations.DelayUIThread;
 import top.niunaijun.aop_api.annotations.Intercept;
-import top.niunaijun.aop_api.annotations.UIThread;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,17 +39,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @AsyncThread
+    @DelayAsyncThread(delayTime = 2000)
     private void getProfile() {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        showToast("获取个人信息成功");
+        showToast("获取个人信息成功 ");
     }
 
-    @UIThread
+    @DelayUIThread(delayTime = 2000)
     private void showToast(String string) {
         mProgress.setVisibility(View.INVISIBLE);
         Toast.makeText(this, string, Toast.LENGTH_SHORT).show();

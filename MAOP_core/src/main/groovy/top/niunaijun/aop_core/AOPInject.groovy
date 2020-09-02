@@ -9,6 +9,8 @@ import javassist.CtNewConstructor
 import javassist.CtNewMethod
 import javassist.bytecode.AccessFlag
 import org.gradle.api.Project
+import top.niunaijun.aop_api.annotations.DelayAsyncThread
+import top.niunaijun.aop_api.annotations.DelayUIThread
 import top.niunaijun.aop_api.annotations.Intercept
 import top.niunaijun.aop_api.annotations.Intercepts
 import top.niunaijun.aop_api.annotations.MAOPInit
@@ -79,9 +81,19 @@ public class AOPInject {
                             createProxyMethod(ctClass, it, UIThread.class, it.name, createUIThreadBody(ctClass, it))
                             write = true
                         }
+                        if (it.hasAnnotation(DelayUIThread.class)) {
+                            println("AOP DelayUIThread =====> " + className + ":" + it.name)
+                            createProxyMethod(ctClass, it, DelayUIThread.class, it.name, createDelayUIThreadBody(ctClass, it))
+                            write = true
+                        }
                         if (it.hasAnnotation(AsyncThread.class)) {
                             println("AOP AsyncThread =====> " + className + ":" + it.name)
                             createProxyMethod(ctClass, it, AsyncThread.class, it.name, createAsyncThreadBody(ctClass, it))
+                            write = true
+                        }
+                        if (it.hasAnnotation(DelayAsyncThread.class)) {
+                            println("AOP DelayAsyncThread =====> " + className + ":" + it.name)
+                            createProxyMethod(ctClass, it, DelayAsyncThread.class, it.name, createDelayAsyncThreadBody(ctClass, it))
                             write = true
                         }
 
@@ -158,6 +170,28 @@ public class AOPInject {
         return "{$methodResult}"
     }
 
+    private static String createDelayUIThreadBody(CtClass ctClass, CtMethod ctMethod) {
+        //方法返回类型
+        def returnType = ctMethod.returnType.name
+        if (!"void".equals(returnType)) {
+            ctClass.detach()
+            throw new Exception("@DelayUIThread是一个异步方法，方法返回值必须是void")
+        }
+        def newName = ctMethod.name + "\$\$" + DelayUIThread.class.simpleName
+        def params = new String[ctMethod.parameterTypes.length]
+        ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
+            params[i] = entry.name
+        }
+        def paramStr = ArrayToSrc(params)
+
+        DelayUIThread delayUIThread = ctMethod.getAnnotation(DelayUIThread.class)
+        def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr}, (long) ${delayUIThread.delayTime()});"
+                :
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr}, (long) ${delayUIThread.delayTime()});"
+        return "{$methodResult}"
+    }
+
     private static String createAsyncThreadBody(CtClass ctClass, CtMethod ctMethod) {
         //方法返回类型
         def returnType = ctMethod.returnType.name
@@ -176,6 +210,29 @@ public class AOPInject {
                 "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr});"
                 :
                 "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr});"
+        return "{$methodResult}"
+    }
+
+    private static String createDelayAsyncThreadBody(CtClass ctClass, CtMethod ctMethod) {
+        //方法返回类型
+        def returnType = ctMethod.returnType.name
+        if (!"void".equals(returnType)) {
+            ctClass.detach()
+            throw new Exception("@DelayAsyncThread是一个异步方法，方法返回值必须是void")
+        }
+        def newName = ctMethod.name + "\$\$" + DelayAsyncThread.class.simpleName
+
+        def params = new String[ctMethod.parameterTypes.length]
+        ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
+            params[i] = entry.name
+        }
+        def paramStr = ArrayToSrc(params)
+
+        DelayAsyncThread delayAsyncThread = ctMethod.getAnnotation(DelayAsyncThread.class)
+        def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
+                "top.niunaijun.aop_api.AOPThreadCore.delayAsyncThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr}, (long) ${delayAsyncThread.delayTime()});"
+                :
+                "top.niunaijun.aop_api.AOPThreadCore.delayAsyncThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr}, (long) ${delayAsyncThread.delayTime()});"
         return "{$methodResult}"
     }
 
