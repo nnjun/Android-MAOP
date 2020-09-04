@@ -57,65 +57,68 @@ public class AOPInject {
                     if (ctClass.isFrozen())
                         ctClass.defrost()
                     boolean write = false
-
-                    if (ctClass.hasAnnotation(Storage.class)) {
+                    try {
+                        if (ctClass.hasAnnotation(Storage.class)) {
 //                            PrefBoolean prefBoolean = it.getAnnotation(PrefBoolean.class)
 //                            it.setBody("""{return top.niunaijun.aop_api.AOPPrefCore.prefBoolean("${prefBoolean.name()}", "${prefBoolean.field()}", ${prefBoolean.def()});}""")
-                        createStorageBody(ctClass, ctClass.getAnnotation(Storage))
-                        write = true
-                    }
-                    ctClass.getDeclaredMethods().each {
-                        def orMethodName = it.name
-                        if (it.hasAnnotation(MAOPInit.class)) {
-                            println("AOP MAOPInit =====> " + className + ":" + it.name)
-                            it.insertBefore("top.niunaijun.aop_api.AOPCore.setContext(\$0);")
+                            createStorageBody(ctClass, ctClass.getAnnotation(Storage))
                             write = true
                         }
-                        if (it.hasAnnotation(TimeLog.class)) {
-                            println("AOP TimeLog =====> " + className + ":" + it.name)
-                            createProxyMethod(ctClass, it, TimeLog.class, it.name, createTimeLogBody(ctClass, it))
-                            write = true
-                        }
-                        if (it.hasAnnotation(UIThread.class)) {
-                            println("AOP UIThread =====> " + className + ":" + it.name)
-                            createProxyMethod(ctClass, it, UIThread.class, it.name, createUIThreadBody(ctClass, it))
-                            write = true
-                        }
-                        if (it.hasAnnotation(DelayUIThread.class)) {
-                            println("AOP DelayUIThread =====> " + className + ":" + it.name)
-                            createProxyMethod(ctClass, it, DelayUIThread.class, it.name, createDelayUIThreadBody(ctClass, it))
-                            write = true
-                        }
-                        if (it.hasAnnotation(AsyncThread.class)) {
-                            println("AOP AsyncThread =====> " + className + ":" + it.name)
-                            createProxyMethod(ctClass, it, AsyncThread.class, it.name, createAsyncThreadBody(ctClass, it))
-                            write = true
-                        }
-                        if (it.hasAnnotation(DelayAsyncThread.class)) {
-                            println("AOP DelayAsyncThread =====> " + className + ":" + it.name)
-                            createProxyMethod(ctClass, it, DelayAsyncThread.class, it.name, createDelayAsyncThreadBody(ctClass, it))
-                            write = true
-                        }
+                        ctClass.getDeclaredMethods().each {
+                            def orMethodName = it.name
+                            if (it.hasAnnotation(MAOPInit.class)) {
+                                println("AOP MAOPInit =====> " + className + ":" + it.name)
+                                it.insertBefore("top.niunaijun.aop_api.AOPCore.setContext(\$0);")
+                                write = true
+                            }
+                            if (it.hasAnnotation(TimeLog.class)) {
+                                println("AOP TimeLog =====> " + className + ":" + it.name)
+                                createProxyMethod(ctClass, it, TimeLog.class, it.name, createTimeLogBody(ctClass, it))
+                                write = true
+                            }
+                            if (it.hasAnnotation(UIThread.class)) {
+                                println("AOP UIThread =====> " + className + ":" + it.name)
+                                createProxyMethod(ctClass, it, UIThread.class, it.name, createUIThreadBody(ctClass, it))
+                                write = true
+                            }
+                            if (it.hasAnnotation(DelayUIThread.class)) {
+                                println("AOP DelayUIThread =====> " + className + ":" + it.name)
+                                createProxyMethod(ctClass, it, DelayUIThread.class, it.name, createDelayUIThreadBody(ctClass, it))
+                                write = true
+                            }
+                            if (it.hasAnnotation(AsyncThread.class)) {
+                                println("AOP AsyncThread =====> " + className + ":" + it.name)
+                                createProxyMethod(ctClass, it, AsyncThread.class, it.name, createAsyncThreadBody(ctClass, it))
+                                write = true
+                            }
+                            if (it.hasAnnotation(DelayAsyncThread.class)) {
+                                println("AOP DelayAsyncThread =====> " + className + ":" + it.name)
+                                createProxyMethod(ctClass, it, DelayAsyncThread.class, it.name, createDelayAsyncThreadBody(ctClass, it))
+                                write = true
+                            }
 
-                        Intercept intercept = it.getAnnotation(Intercept.class)
-                        if (intercept != null) {
-                            String interceptStr = String.format(""" if(top.niunaijun.aop_api.AOPCore.intercept("%s")) return;""", intercept.name())
-                            it.insertBefore(interceptStr)
-                            println("AOP Intercept:" + intercept.name() + " =====> " + className + ":" + orMethodName)
-                            write = true
-                        }
+                            Intercept intercept = it.getAnnotation(Intercept.class)
+                            if (intercept != null) {
+                                String interceptStr = String.format(""" if(top.niunaijun.aop_api.AOPCore.intercept("%s")) return;""", intercept.name())
+                                it.insertBefore(interceptStr)
+                                println("AOP Intercept:" + intercept.name() + " =====> " + className + ":" + orMethodName)
+                                write = true
+                            }
 
-                        Intercepts intercepts = it.getAnnotation(Intercepts.class)
-                        if (intercepts != null) {
-                            String interceptStr = String.format(""" if(top.niunaijun.aop_api.AOPCore.intercept(%s)) return;""",
-                                    ArrayToSrc(intercepts.names()))
-                            it.insertBefore(interceptStr);
-                            println("AOP Intercepts:" + intercepts.names().join(",") + " =====> " + className + ":" + orMethodName)
-                            write = true
+                            Intercepts intercepts = it.getAnnotation(Intercepts.class)
+                            if (intercepts != null) {
+                                String interceptStr = String.format(""" if(top.niunaijun.aop_api.AOPCore.intercept(%s)) return;""",
+                                        ArrayToSrc(intercepts.names()))
+                                it.insertBefore(interceptStr);
+                                println("AOP Intercepts:" + intercepts.names().join(",") + " =====> " + className + ":" + orMethodName)
+                                write = true
+                            }
                         }
-                    }
-                    if (write) {
-                        ctClass.writeFile(path)
+                        if (write) {
+                            ctClass.writeFile(path)
+                        }
+                    } catch(Exception e) {
+                        e.printStackTrace()
                     }
                     ctClass.detach()//释放
                 }
