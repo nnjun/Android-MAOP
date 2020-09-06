@@ -23,7 +23,7 @@ public class AOPThreadCore {
                 try {
                     Class<?>[] classes = new Class[args.length];
                     for (int i = 0; i < args.length; i++) {
-                        classes[i] = args.getClass();
+                        classes[i] = args[i].getClass();
                     }
                     Method method1 = clazz.getDeclaredMethod(method, classes);
                     method1.setAccessible(true);
@@ -61,7 +61,7 @@ public class AOPThreadCore {
                 try {
                     Class<?>[] classes = new Class[args.length];
                     for (int i = 0; i < args.length; i++) {
-                        classes[i] = args.getClass();
+                        classes[i] = args[i].getClass();
                     }
                     Method method1 = clazz.getDeclaredMethod(method, classes);
                     method1.setAccessible(true);
