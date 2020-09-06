@@ -75,24 +75,24 @@ public class AOPThreadCore {
     }
 
     private static Class<?> parseClass(String className) throws ClassNotFoundException {
+        System.out.println("find " + className);
         int count = 0;
         while (className.contains("[]")) {
             className = className.replaceFirst("[\\[]", "").replaceFirst("[\\]]", "");
             count++;
         }
 
-        String base;
         if (count == 0) {
-            base = parseBaseClass(className);
-            if (base != null)
-                return Class.forName(base);
+            Class<?> base2 = parseBaseClass2(className);
+            if (base2 != null)
+                return base2;
             return Class.forName(className);
         } else {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < count; i++) {
                 builder.append("[");
             }
-            base = parseBaseClass(className);
+            String base = parseBaseClass(className);
             if (base == null){
                 builder.append("L").append(className).append(";");
             }else{
@@ -102,7 +102,29 @@ public class AOPThreadCore {
         }
     }
 
-    private static String  parseBaseClass(String clazz) {
+    private static Class<?> parseBaseClass2(String className) {
+        switch (className) {
+            case "int":
+                return int.class;
+            case "byte":
+                return byte.class;
+            case "short":
+                return short.class;
+            case "long":
+                return long.class;
+            case "float":
+                return float.class;
+            case "double":
+                return double.class;
+            case "boolean":
+                return boolean.class;
+            case "char":
+                return char.class;
+        }
+        return null;
+    }
+
+    private static String parseBaseClass(String clazz) {
         switch (clazz) {
             case "int":
                 return "I";
