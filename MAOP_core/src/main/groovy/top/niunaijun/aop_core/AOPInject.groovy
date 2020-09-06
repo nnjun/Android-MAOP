@@ -162,14 +162,14 @@ public class AOPInject {
         def newName = ctMethod.name + "\$\$" + UIThread.class.simpleName
         def params = new String[ctMethod.parameterTypes.length]
         ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
-            params[i] = entry.class.name
+            params[i] = entry.name
         }
         def paramStr = ArrayToSrc(params)
 
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
-                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", null, \$args);"
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr});"
                 :
-                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", this, \$args);"
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr});"
         return "{$methodResult}"
     }
 
@@ -183,15 +183,15 @@ public class AOPInject {
         def newName = ctMethod.name + "\$\$" + DelayUIThread.class.simpleName
         def params = new String[ctMethod.parameterTypes.length]
         ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
-            params[i] = entry.class.name
+            params[i] = entry.name
         }
         def paramStr = ArrayToSrc(params)
 
         DelayUIThread delayUIThread = ctMethod.getAnnotation(DelayUIThread.class)
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
-                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", null, \$args, (long) ${delayUIThread.delayTime()});"
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr}, (long) ${delayUIThread.delayTime()});"
                 :
-                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", this, \$args, (long) ${delayUIThread.delayTime()});"
+                "top.niunaijun.aop_api.AOPThreadCore.runUIThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr}, (long) ${delayUIThread.delayTime()});"
         return "{$methodResult}"
     }
 
@@ -206,13 +206,13 @@ public class AOPInject {
 
         def params = new String[ctMethod.parameterTypes.length]
         ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
-            params[i] = entry.class.name
+            params[i] = entry.name
         }
         def paramStr = ArrayToSrc(params)
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
-                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(${ctClass.name}.class, \"${newName}\", null, \$args);"
+                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr});"
                 :
-                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(${ctClass.name}.class, \"${newName}\", this, \$args);"
+                "top.niunaijun.aop_api.AOPThreadCore.runAsyncThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr});"
         return "{$methodResult}"
     }
 
@@ -227,15 +227,15 @@ public class AOPInject {
 
         def params = new String[ctMethod.parameterTypes.length]
         ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
-            params[i] = entry.class.name
+            params[i] = entry.name
         }
         def paramStr = ArrayToSrc(params)
 
         DelayAsyncThread delayAsyncThread = ctMethod.getAnnotation(DelayAsyncThread.class)
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
-                "top.niunaijun.aop_api.AOPThreadCore.delayAsyncThread(${ctClass.name}.class, \"${newName}\", null, \$args, (long) ${delayAsyncThread.delayTime()});"
+                "top.niunaijun.aop_api.AOPThreadCore.delayAsyncThread(${ctClass.name}.class, \"${newName}\", null, \$args, ${paramStr}, (long) ${delayAsyncThread.delayTime()});"
                 :
-                "top.niunaijun.aop_api.AOPThreadCore.delayAsyncThread(${ctClass.name}.class, \"${newName}\", this, \$args, (long) ${delayAsyncThread.delayTime()});"
+                "top.niunaijun.aop_api.AOPThreadCore.delayAsyncThread(${ctClass.name}.class, \"${newName}\", this, \$args, ${paramStr}, (long) ${delayAsyncThread.delayTime()});"
         return "{$methodResult}"
     }
 
