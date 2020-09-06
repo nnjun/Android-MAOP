@@ -162,7 +162,7 @@ public class AOPInject {
         def newName = ctMethod.name + "\$\$" + UIThread.class.simpleName
         def params = new String[ctMethod.parameterTypes.length]
         ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
-            params[i] = entry.name
+            params[i] = entry.class.name
         }
         def paramStr = ArrayToSrc(params)
 
@@ -183,7 +183,7 @@ public class AOPInject {
         def newName = ctMethod.name + "\$\$" + DelayUIThread.class.simpleName
         def params = new String[ctMethod.parameterTypes.length]
         ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
-            params[i] = entry.name
+            params[i] = entry.class.name
         }
         def paramStr = ArrayToSrc(params)
 
@@ -206,7 +206,7 @@ public class AOPInject {
 
         def params = new String[ctMethod.parameterTypes.length]
         ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
-            params[i] = entry.name
+            params[i] = entry.class.name
         }
         def paramStr = ArrayToSrc(params)
         def methodResult = ctMethod.methodInfo.getAccessFlags() & AccessFlag.STATIC ?
@@ -227,7 +227,7 @@ public class AOPInject {
 
         def params = new String[ctMethod.parameterTypes.length]
         ctMethod.parameterTypes.eachWithIndex { CtClass entry, int i ->
-            params[i] = entry.name
+            params[i] = entry.class.name
         }
         def paramStr = ArrayToSrc(params)
 
