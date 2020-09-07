@@ -18,6 +18,7 @@ public class AOPThreadCore {
     }
 
     public static void runUIThread(final Class<?> clazz, final String method, Object target, Object[] args, final String[] paramClazz, long delay) {
+        final boolean staticV = target == null;
         final WeakReference<?> targetWeak = new WeakReference<>(target);
         final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
         for (int i = 0; i < args.length; i++) {
@@ -27,7 +28,7 @@ public class AOPThreadCore {
             @Override
             public void run() {
                 try {
-                    call(clazz, method, targetWeak, argsWeak, paramClazz);
+                    call(clazz, method, targetWeak, argsWeak, paramClazz, staticV);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
@@ -55,6 +56,7 @@ public class AOPThreadCore {
     }
 
     public static void runAsyncThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz) {
+        final boolean staticV = target == null;
         final WeakReference<?> targetWeak = new WeakReference<>(target);
         final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
         for (int i = 0; i < args.length; i++) {
@@ -63,12 +65,12 @@ public class AOPThreadCore {
         sExecutorService.execute(new Runnable() {
             @Override
             public void run() {
-                call(clazz, method, targetWeak, argsWeak, paramClazz);
+                call(clazz, method, targetWeak, argsWeak, paramClazz, staticV);
             }
         });
     }
 
-    private static void call(final Class<?> clazz, final String method, WeakReference<?> target, WeakReference<?>[] args, final String[] paramClazz) {
+    private static void call(final Class<?> clazz, final String method, WeakReference<?> target, WeakReference<?>[] args, final String[] paramClazz, boolean staticV) {
         try {
             Class<?>[] classes = new Class[paramClazz.length];
             for (int i = 0; i < paramClazz.length; i++) {
@@ -83,7 +85,7 @@ public class AOPThreadCore {
             }
 
             Object targetIns = target.get();
-            if (targetIns == null)
+            if (targetIns == null && !staticV)
                 return;
             method1.invoke(targetIns, argsObj);
             target.clear();
