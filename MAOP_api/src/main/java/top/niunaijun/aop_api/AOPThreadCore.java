@@ -3,6 +3,7 @@ package top.niunaijun.aop_api;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
@@ -16,7 +17,12 @@ public class AOPThreadCore {
         runUIThread(clazz, method, target, args, paramClazz, 0);
     }
 
-    public static void runUIThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz, long delay) {
+    public static void runUIThread(final Class<?> clazz, final String method, Object target, Object[] args, final String[] paramClazz, long delay) {
+        final WeakReference<?> targetWeak = new WeakReference<>(target);
+        final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
+        for (int i = 0; i < args.length; i++) {
+            argsWeak[i] = new WeakReference<>(args[i]);
+        }
         sHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -27,7 +33,16 @@ public class AOPThreadCore {
                     }
                     Method method1 = clazz.getDeclaredMethod(method, classes);
                     method1.setAccessible(true);
-                    method1.invoke(target, args);
+
+                    Object[] argsObj = new Object[argsWeak.length];
+                    for (int i = 0; i < argsWeak.length; i++) {
+                        argsObj[i] = argsWeak[i].get();
+                    }
+                    method1.invoke(targetWeak.get(), argsObj);
+                    targetWeak.clear();
+                    for (WeakReference<?> weakReference : argsWeak) {
+                        weakReference.clear();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
@@ -54,7 +69,12 @@ public class AOPThreadCore {
         });
     }
 
-    public static void runAsyncThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz) {
+    public static void runAsyncThread(final Class<?> clazz, final String method, Object target, Object[] args, final String[] paramClazz) {
+        final WeakReference<?> targetWeak = new WeakReference<>(target);
+        final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
+        for (int i = 0; i < args.length; i++) {
+            argsWeak[i] = new WeakReference<>(args[i]);
+        }
         sExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -65,7 +85,16 @@ public class AOPThreadCore {
                     }
                     Method method1 = clazz.getDeclaredMethod(method, classes);
                     method1.setAccessible(true);
-                    method1.invoke(target, args);
+
+                    Object[] argsObj = new Object[argsWeak.length];
+                    for (int i = 0; i < argsWeak.length; i++) {
+                        argsObj[i] = argsWeak[i].get();
+                    }
+                    method1.invoke(targetWeak.get(), argsObj);
+                    targetWeak.clear();
+                    for (WeakReference<?> weakReference : argsWeak) {
+                        weakReference.clear();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
@@ -93,9 +122,9 @@ public class AOPThreadCore {
                 builder.append("[");
             }
             String base = parseBaseClass(className);
-            if (base == null){
+            if (base == null) {
                 builder.append("L").append(className).append(";");
-            }else{
+            } else {
                 builder.append(base);
             }
             return Class.forName(builder.toString());
