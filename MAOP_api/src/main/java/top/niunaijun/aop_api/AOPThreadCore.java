@@ -27,22 +27,7 @@ public class AOPThreadCore {
             @Override
             public void run() {
                 try {
-                    Class<?>[] classes = new Class[paramClazz.length];
-                    for (int i = 0; i < paramClazz.length; i++) {
-                        classes[i] = parseClass(paramClazz[i]);
-                    }
-                    Method method1 = clazz.getDeclaredMethod(method, classes);
-                    method1.setAccessible(true);
-
-                    Object[] argsObj = new Object[argsWeak.length];
-                    for (int i = 0; i < argsWeak.length; i++) {
-                        argsObj[i] = argsWeak[i].get();
-                    }
-                    method1.invoke(targetWeak.get(), argsObj);
-                    targetWeak.clear();
-                    for (WeakReference<?> weakReference : argsWeak) {
-                        weakReference.clear();
-                    }
+                    call(clazz, method, targetWeak, argsWeak, paramClazz);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
@@ -69,7 +54,7 @@ public class AOPThreadCore {
         });
     }
 
-    public static void runAsyncThread(final Class<?> clazz, final String method, Object target, Object[] args, final String[] paramClazz) {
+    public static void runAsyncThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz) {
         final WeakReference<?> targetWeak = new WeakReference<>(target);
         final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
         for (int i = 0; i < args.length; i++) {
@@ -78,29 +63,37 @@ public class AOPThreadCore {
         sExecutorService.execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Class<?>[] classes = new Class[paramClazz.length];
-                    for (int i = 0; i < paramClazz.length; i++) {
-                        classes[i] = parseClass(paramClazz[i]);
-                    }
-                    Method method1 = clazz.getDeclaredMethod(method, classes);
-                    method1.setAccessible(true);
-
-                    Object[] argsObj = new Object[argsWeak.length];
-                    for (int i = 0; i < argsWeak.length; i++) {
-                        argsObj[i] = argsWeak[i].get();
-                    }
-                    method1.invoke(targetWeak.get(), argsObj);
-                    targetWeak.clear();
-                    for (WeakReference<?> weakReference : argsWeak) {
-                        weakReference.clear();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
+                call(clazz, method, targetWeak, argsWeak, paramClazz);
             }
         });
+    }
+
+    private static void call(final Class<?> clazz, final String method, WeakReference<?> target, WeakReference<?>[] args, final String[] paramClazz) {
+        try {
+            Class<?>[] classes = new Class[paramClazz.length];
+            for (int i = 0; i < paramClazz.length; i++) {
+                classes[i] = parseClass(paramClazz[i]);
+            }
+            Method method1 = clazz.getDeclaredMethod(method, classes);
+            method1.setAccessible(true);
+
+            Object[] argsObj = new Object[args.length];
+            for (int i = 0; i < args.length; i++) {
+                argsObj[i] = args[i].get();
+            }
+
+            Object targetIns = target.get();
+            if (targetIns == null)
+                return;
+            method1.invoke(targetIns, argsObj);
+            target.clear();
+            for (WeakReference<?> weakReference : args) {
+                weakReference.clear();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     private static Class<?> parseClass(String className) throws ClassNotFoundException {
