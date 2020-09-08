@@ -99,7 +99,6 @@ public class AOPThreadCore {
     }
 
     private static Class<?> parseClass(String className) throws ClassNotFoundException {
-        System.out.println("find " + className);
         int count = 0;
         while (className.contains("[]")) {
             className = className.replaceFirst("[\\[]", "").replaceFirst("[\\]]", "");
