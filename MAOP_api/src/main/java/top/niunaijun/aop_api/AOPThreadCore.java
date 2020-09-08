@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,21 +14,6 @@ public class AOPThreadCore {
 
     public static void runUIThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz) {
         runUIThread(clazz, method, target, args, paramClazz, 0);
-    }
-
-    public static void runUIThread(final Class<?> clazz, final String method, Object target, Object[] args, final String[] paramClazz, long delay) {
-        final boolean staticV = target == null;
-        final WeakReference<?> targetWeak = new WeakReference<>(target);
-        final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
-        for (int i = 0; i < args.length; i++) {
-            argsWeak[i] = new WeakReference<>(args[i]);
-        }
-        sHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                call(clazz, method, targetWeak, argsWeak, paramClazz, staticV);
-            }
-        }, delay);
     }
 
     public static void delayAsyncThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz, final long delay) {
@@ -50,19 +34,12 @@ public class AOPThreadCore {
         });
     }
 
+    public static void runUIThread(final Class<?> clazz, final String method, Object target, Object[] args, final String[] paramClazz, long delay) {
+        Call.create().runUIThread(clazz, method, target, args, paramClazz, delay);
+    }
+
     public static void runAsyncThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz) {
-        final boolean staticV = target == null;
-        final WeakReference<?> targetWeak = new WeakReference<>(target);
-        final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
-        for (int i = 0; i < args.length; i++) {
-            argsWeak[i] = new WeakReference<>(args[i]);
-        }
-        sExecutorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                call(clazz, method, targetWeak, argsWeak, paramClazz, staticV);
-            }
-        });
+        Call.create().runAsyncThread(clazz, method, target, args, paramClazz);
     }
 
     private static void call(final Class<?> clazz, final String method, WeakReference<?> target, WeakReference<?>[] args, final String[] paramClazz, boolean staticV) {
@@ -92,6 +69,42 @@ public class AOPThreadCore {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        }
+    }
+
+    static class Call {
+        public static Call create() {
+            return new Call();
+        }
+
+        public void runAsyncThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz) {
+            final boolean staticV = target == null;
+            final WeakReference<?> targetWeak = new WeakReference<>(target);
+            final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
+            for (int i = 0; i < args.length; i++) {
+                argsWeak[i] = new WeakReference<>(args[i]);
+            }
+            sExecutorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    call(clazz, method, targetWeak, argsWeak, paramClazz, staticV);
+                }
+            });
+        }
+
+        public void runUIThread(final Class<?> clazz, final String method, Object target, Object[] args, final String[] paramClazz, long delay) {
+            final boolean staticV = target == null;
+            final WeakReference<?> targetWeak = new WeakReference<>(target);
+            final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
+            for (int i = 0; i < args.length; i++) {
+                argsWeak[i] = new WeakReference<>(args[i]);
+            }
+            sHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    call(clazz, method, targetWeak, argsWeak, paramClazz, staticV);
+                }
+            }, delay);
         }
     }
 
