@@ -27,12 +27,7 @@ public class AOPThreadCore {
         sHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                try {
-                    call(clazz, method, targetWeak, argsWeak, paramClazz, staticV);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
+                call(clazz, method, targetWeak, argsWeak, paramClazz, staticV);
             }
         }, delay);
     }
@@ -92,6 +87,8 @@ public class AOPThreadCore {
             for (WeakReference<?> weakReference : args) {
                 weakReference.clear();
             }
+        } catch (IllegalArgumentException l) {
+            l.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
