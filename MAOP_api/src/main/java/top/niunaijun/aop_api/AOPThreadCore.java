@@ -60,10 +60,10 @@ public class AOPThreadCore {
             if (targetIns == null && !staticV)
                 return;
             method1.invoke(targetIns, argsObj);
-            target.clear();
-            for (WeakReference<?> weakReference : args) {
-                weakReference.clear();
-            }
+//            target.clear();
+//            for (WeakReference<?> weakReference : args) {
+//                weakReference.clear();
+//            }
         } catch (IllegalArgumentException l) {
             l.printStackTrace();
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public class AOPThreadCore {
             return new Call();
         }
 
-        public void runAsyncThread(final Class<?> clazz, final String method, final Object target, final Object[] args, final String[] paramClazz) {
+        public void runAsyncThread(final Class<?> clazz, final String method, Object target, Object[] args, final String[] paramClazz) {
             final boolean staticV = target == null;
             final WeakReference<?> targetWeak = new WeakReference<>(target);
             final WeakReference<?>[] argsWeak = new WeakReference<?>[args.length];
