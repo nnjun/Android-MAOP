@@ -84,18 +84,15 @@ public class AOPTransform extends Transform {
             }
 
             for (JarInput jarInput : input.getJarInputs()) {
-//                String jarName = jarInput.getName();
-//                String md5Name = DigestUtils.md5Hex(jarInput.getFile().getAbsolutePath());
-//                if (jarName.endsWith(".jar")) {
-//                    jarName = jarName.substring(0, jarName.length() - 4);
-//                }
-                // File name = outputProvider.getContentLocation(jarName + md5Name, jarInput.getContentTypes(), jarInput.getScopes(), Format.JAR);
-                File name = outputProvider.getContentLocation(
-                        jarInput.getName(), jarInput.getContentTypes(), jarInput.getScopes(),
-                        Format.JAR);
+                String jarName = jarInput.getName();
+                String md5Name = DigestUtils.md5Hex(jarInput.getFile().getAbsolutePath());
+                if (jarName.endsWith(".jar")) {
+                    jarName = jarName.substring(0, jarName.length() - 4);
+                }
+                File name = outputProvider.getContentLocation(jarName + md5Name, jarInput.getContentTypes(), jarInput.getScopes(), Format.JAR);
                 FileUtils.copyFile(jarInput.getFile(), name);
 //                System.out.println("transform jar: " + jarInput.getFile());
-                AOPInject.addJar(name.getAbsolutePath());
+                AOPInject.addJar(jarInput.getFile().getAbsolutePath());
             }
         }
     }
