@@ -92,7 +92,7 @@ public class AOPTransform extends Transform {
                 File name = outputProvider.getContentLocation(jarName + md5Name, jarInput.getContentTypes(), jarInput.getScopes(), Format.JAR);
                 FileUtils.copyFile(jarInput.getFile(), name);
 //                System.out.println("transform jar: " + jarInput.getFile());
-                AOPInject.addJar(jarInput.getFile().getAbsolutePath());
+                AOPInject.addJar(name.getAbsolutePath());
             }
         }
     }
