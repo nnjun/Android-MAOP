@@ -117,7 +117,7 @@ public class AOPInject {
                         if (write) {
                             ctClass.writeFile(path)
                         }
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace()
                     }
                     ctClass.detach()//释放
@@ -128,6 +128,10 @@ public class AOPInject {
 
     private static void createProxyMethod(CtClass ctClass, CtMethod ctMethod, Class annotation, String orName, String body) {
         def newName = ctMethod.name + "\$\$" + annotation.simpleName
+        if (ctMethod.name.contains("\$\$") && newName.startsWith(ctMethod.name)) {
+            // 重复生成
+            return
+        }
         ctMethod.setName(newName)
         def proxyMethod = CtNewMethod.make(ctMethod.modifiers, ctMethod.returnType, orName, ctMethod.parameterTypes, ctMethod.exceptionTypes, body, ctClass)
         ctClass.addMethod(proxyMethod)
