@@ -123,13 +123,13 @@ public class AOPInject {
     private static void createProxyMethod(CtClass ctClass, CtMethod ctMethod, Class annotation, String orName, String body) {
         def newEnd = "\$\$" + annotation.simpleName
         def newName = ctMethod.name + newEnd
-        def method = ctClass.getDeclaredMethod(newName)
-        if (method != null)
-            return
-//        if (newName.contains(newEnd + newEnd)) {
-            // 重复生成
+//        def method = ctClass.getDeclaredMethod(newName)
+//        if (method != null)
 //            return
-//        }
+        if (newName.contains(newEnd + newEnd)) {
+//             重复生成
+            return
+        }
         ctMethod.setName(newName)
         def proxyMethod = CtNewMethod.make(ctMethod.modifiers, ctMethod.returnType, orName, ctMethod.parameterTypes, ctMethod.exceptionTypes, body, ctClass)
         ctClass.addMethod(proxyMethod)
