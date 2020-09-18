@@ -40,12 +40,12 @@ public class AOPInject {
             //遍历文件夹
             dir.eachFileRecurse { File file ->
                 String filePath = file.absolutePath
-//                println("filePath = " + filePath)
+                println("filePath = " + filePath)
                 if (filePath.endsWith(".class")) {
                     filePath = filePath.replace("\\", "/")
                     String className = filePath.split("/classes/")[1]
                             .replace("/", ".").replace(".class", "")
-//                    println("class = " + className)
+                    println("class = " + className)
                     CtClass ctClass = pool.getCtClass(className);
                     //解冻
                     if (ctClass.isFrozen())
