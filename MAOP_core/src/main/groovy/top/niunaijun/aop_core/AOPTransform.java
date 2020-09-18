@@ -75,14 +75,14 @@ public class AOPTransform extends Transform {
                           Collection<TransformInput> referencedInputs,
                           TransformOutputProvider outputProvider,
                           boolean isIncremental) throws IOException, TransformException, InterruptedException {
-        System.out.println("in aop transform");
+//        System.out.println("in aop transform");
         AOPInject inject = new AOPInject();
         for (TransformInput input : inputs) {
             for (DirectoryInput directoryInput : input.getDirectoryInputs()) {
                 inject.inject(directoryInput.getFile().getAbsolutePath(), mProject);
                 File name = outputProvider.getContentLocation(directoryInput.getName(), directoryInput.getContentTypes(), directoryInput.getScopes(), Format.DIRECTORY);
                 FileUtils.copyDirectory(directoryInput.getFile(), name);
-                System.out.println("transform dir: " + name.getAbsolutePath());
+//                System.out.println("transform dir: " + name.getAbsolutePath());
             }
 
             for (JarInput jarInput : input.getJarInputs()) {
@@ -93,7 +93,7 @@ public class AOPTransform extends Transform {
                 }
                 File name = outputProvider.getContentLocation(jarName + md5Name, jarInput.getContentTypes(), jarInput.getScopes(), Format.JAR);
                 FileUtils.copyFile(jarInput.getFile(), name);
-                System.out.println("transform jar: " + jarInput.getFile());
+//                System.out.println("transform jar: " + jarInput.getFile());
                 inject.addJar(jarInput.getFile().getAbsolutePath());
             }
         }
