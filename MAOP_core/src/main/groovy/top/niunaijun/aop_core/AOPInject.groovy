@@ -2,10 +2,7 @@ package top.niunaijun.aop_core
 
 import javassist.ClassPool
 import javassist.CtClass
-import javassist.CtConstructor
-import javassist.CtField
 import javassist.CtMethod
-import javassist.CtNewConstructor
 import javassist.CtNewMethod
 import javassist.bytecode.AccessFlag
 import org.gradle.api.Project
@@ -14,8 +11,6 @@ import top.niunaijun.aop_api.annotations.DelayUIThread
 import top.niunaijun.aop_api.annotations.Intercept
 import top.niunaijun.aop_api.annotations.Intercepts
 import top.niunaijun.aop_api.annotations.MAOPInit
-import top.niunaijun.aop_api.annotations.PrefAll
-import top.niunaijun.aop_api.annotations.PrefBoolean
 import top.niunaijun.aop_api.annotations.Storage
 import top.niunaijun.aop_api.annotations.TimeLog
 import top.niunaijun.aop_api.annotations.UIThread
@@ -39,7 +34,6 @@ public class AOPInject {
         pool.importPackage("top.niunaijun.aop_api.AOPCore")
         pool.importPackage("top.niunaijun.aop_api.AOPThreadCore")
         pool.importPackage("top.niunaijun.aop_api.AOPPrefCore")
-
 
         File dir = new File(path);
         if (dir.isDirectory()) {
@@ -127,11 +121,11 @@ public class AOPInject {
     }
 
     private static void createProxyMethod(CtClass ctClass, CtMethod ctMethod, Class annotation, String orName, String body) {
-        def newEnd = "\$\$" + annotation.simpleName;
+        def newEnd = "\$\$" + annotation.simpleName
         def newName = ctMethod.name + newEnd
         if (newName.contains(newEnd + newEnd)) {
             // 重复生成
-            return
+            throw new Exception("重复class")
         }
         ctMethod.setName(newName)
         def proxyMethod = CtNewMethod.make(ctMethod.modifiers, ctMethod.returnType, orName, ctMethod.parameterTypes, ctMethod.exceptionTypes, body, ctClass)
