@@ -77,7 +77,7 @@ public class AOPTransform extends Transform {
                           boolean isIncremental) throws IOException, TransformException, InterruptedException {
         for (TransformInput input : inputs) {
             for (DirectoryInput directoryInput : input.getDirectoryInputs()) {
-//                AOPInject.inject(directoryInput.getFile().getAbsolutePath(), mProject);
+                AOPInject.inject(directoryInput.getFile().getAbsolutePath(), mProject);
                 File name = outputProvider.getContentLocation(directoryInput.getName(), directoryInput.getContentTypes(), directoryInput.getScopes(), Format.DIRECTORY);
                 FileUtils.copyDirectory(directoryInput.getFile(), name);
 //                System.out.println("transform dir: " + name.getAbsolutePath());
