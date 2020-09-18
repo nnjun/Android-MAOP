@@ -11,6 +11,7 @@ import com.android.build.api.transform.TransformException;
 import com.android.build.api.transform.TransformInput;
 import com.android.build.api.transform.TransformOutputProvider;
 import com.android.build.gradle.internal.pipeline.TransformManager;
+import com.google.common.collect.Sets;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -55,7 +56,8 @@ public class AOPTransform extends Transform {
 //    TESTED_CODE                   由当前变量(包括依赖项)测试的代码
     @Override
     public Set<? super QualifiedContent.Scope> getScopes() {
-        return TransformManager.SCOPE_FULL_PROJECT;
+//        return TransformManager.SCOPE_FULL_PROJECT;
+        return Sets.immutableEnumSet(QualifiedContent.Scope.PROJECT);
     }
 
     //指明当前Transform是否支持增量编译
@@ -82,12 +84,15 @@ public class AOPTransform extends Transform {
             }
 
             for (JarInput jarInput : input.getJarInputs()) {
-                String jarName = jarInput.getName();
-                String md5Name = DigestUtils.md5Hex(jarInput.getFile().getAbsolutePath());
-                if (jarName.endsWith(".jar")) {
-                    jarName = jarName.substring(0, jarName.length() - 4);
-                }
-                File name = outputProvider.getContentLocation(jarName + md5Name, jarInput.getContentTypes(), jarInput.getScopes(), Format.JAR);
+//                String jarName = jarInput.getName();
+//                String md5Name = DigestUtils.md5Hex(jarInput.getFile().getAbsolutePath());
+//                if (jarName.endsWith(".jar")) {
+//                    jarName = jarName.substring(0, jarName.length() - 4);
+//                }
+                // File name = outputProvider.getContentLocation(jarName + md5Name, jarInput.getContentTypes(), jarInput.getScopes(), Format.JAR);
+                File name = outputProvider.getContentLocation(
+                        jarInput.getName(), jarInput.getContentTypes(), jarInput.getScopes(),
+                        Format.JAR);
                 FileUtils.copyFile(jarInput.getFile(), name);
 //                System.out.println("transform jar: " + jarInput.getFile());
                 AOPInject.addJar(name.getAbsolutePath());
