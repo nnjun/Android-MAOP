@@ -18,14 +18,19 @@ import top.niunaijun.aop_api.annotations.AsyncThread
 
 public class AOPInject {
     //初始化类池
-    private final static ClassPool pool = ClassPool.getDefault();
+    private final ClassPool pool
 
-    public static void addJar(String jar) {
+    AOPInject() {
+        pool = new ClassPool(null);
+        pool.appendSystemPath()
+    }
+
+    public void addJar(String jar) {
         pool.appendClassPath(jar)
         pool.clearImportedPackages()
     }
 
-    public static void inject(String path, Project project) {
+    public void inject(String path, Project project) {
         //将当前路径加入类池,不然找不到这个类
         pool.appendClassPath(path);
         //project.android.bootClasspath 加入android.jar，不然找不到android相关的所有类
@@ -121,7 +126,7 @@ public class AOPInject {
         }
     }
 
-    private static void createProxyMethod(CtClass ctClass, CtMethod ctMethod, Class annotation, String orName, String body) {
+    private void createProxyMethod(CtClass ctClass, CtMethod ctMethod, Class annotation, String orName, String body) {
         def newEnd = "\$\$" + annotation.simpleName
         def newName = ctMethod.name + newEnd
 //        def method = ctClass.getDeclaredMethod(newName)
@@ -136,7 +141,7 @@ public class AOPInject {
         ctClass.addMethod(proxyMethod)
     }
 
-    private static String createTimeLogBody(CtClass ctClass, CtMethod ctMethod) {
+    private String createTimeLogBody(CtClass ctClass, CtMethod ctMethod) {
         //方法返回类型
         def returnType = ctMethod.returnType.name
         def newName = ctMethod.name + "\$\$" + TimeLog.class.simpleName
@@ -155,7 +160,7 @@ public class AOPInject {
                 ("void".equals(returnType) ? "}" : "return result;}")
     }
 
-    private static String createUIThreadBody(CtClass ctClass, CtMethod ctMethod) {
+    private String createUIThreadBody(CtClass ctClass, CtMethod ctMethod) {
         //方法返回类型
         def returnType = ctMethod.returnType.name
         if (!"void".equals(returnType)) {
@@ -176,7 +181,7 @@ public class AOPInject {
         return "{$methodResult}"
     }
 
-    private static String createDelayUIThreadBody(CtClass ctClass, CtMethod ctMethod) {
+    private String createDelayUIThreadBody(CtClass ctClass, CtMethod ctMethod) {
         //方法返回类型
         def returnType = ctMethod.returnType.name
         if (!"void".equals(returnType)) {
@@ -198,7 +203,7 @@ public class AOPInject {
         return "{$methodResult}"
     }
 
-    private static String createAsyncThreadBody(CtClass ctClass, CtMethod ctMethod) {
+    private String createAsyncThreadBody(CtClass ctClass, CtMethod ctMethod) {
         //方法返回类型
         def returnType = ctMethod.returnType.name
         if (!"void".equals(returnType)) {
@@ -219,7 +224,7 @@ public class AOPInject {
         return "{$methodResult}"
     }
 
-    private static String createDelayAsyncThreadBody(CtClass ctClass, CtMethod ctMethod) {
+    private String createDelayAsyncThreadBody(CtClass ctClass, CtMethod ctMethod) {
         //方法返回类型
         def returnType = ctMethod.returnType.name
         if (!"void".equals(returnType)) {
@@ -242,7 +247,7 @@ public class AOPInject {
         return "{$methodResult}"
     }
 
-    private static void createStorageBody(CtClass ctClass, Storage storage) {
+    private void createStorageBody(CtClass ctClass, Storage storage) {
         def getStorageMethod = CtNewMethod.make("""public ${ctClass.name} getStorage() {return top.niunaijun.aop_api.AOPPrefCore.getStorage("${storage.name()}", "${ctClass.name}");} """, ctClass)
         ctClass.addMethod(getStorageMethod)
 
@@ -250,7 +255,7 @@ public class AOPInject {
         ctClass.addMethod(setStorageMethod)
     }
 
-    private static String ArrayToSrc(String[] strings) {
+    private String ArrayToSrc(String[] strings) {
         List<String> newStr = new ArrayList<>()
 
         strings.each {
