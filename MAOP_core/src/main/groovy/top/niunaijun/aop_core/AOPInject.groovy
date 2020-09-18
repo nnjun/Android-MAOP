@@ -28,14 +28,14 @@ public class AOPInject {
         //将当前路径加入类池,不然找不到这个类
         pool.appendClassPath(path);
         //project.android.bootClasspath 加入android.jar，不然找不到android相关的所有类
-        pool.appendClassPath(project.android.bootClasspath[0].toString());
+        pool.appendClassPath(project.android.bootClasspath[0].toString())
         //引入android.os.Bundle包，因为onCreate方法参数有Bundle
-        pool.importPackage("android.os.Bundle");
+        pool.importPackage("android.os.Bundle")
         pool.importPackage("top.niunaijun.aop_api.AOPCore")
         pool.importPackage("top.niunaijun.aop_api.AOPThreadCore")
         pool.importPackage("top.niunaijun.aop_api.AOPPrefCore")
 
-        File dir = new File(path);
+        File dir = new File(path)
         if (dir.isDirectory()) {
             //遍历文件夹
             dir.eachFileRecurse { File file ->

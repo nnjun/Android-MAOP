@@ -9,6 +9,7 @@ import com.android.build.api.transform.QualifiedContent;
 import com.android.build.api.transform.Transform;
 import com.android.build.api.transform.TransformException;
 import com.android.build.api.transform.TransformInput;
+import com.android.build.api.transform.TransformInvocation;
 import com.android.build.api.transform.TransformOutputProvider;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.google.common.collect.Sets;
@@ -56,8 +57,7 @@ public class AOPTransform extends Transform {
 //    TESTED_CODE                   由当前变量(包括依赖项)测试的代码
     @Override
     public Set<? super QualifiedContent.Scope> getScopes() {
-//        return TransformManager.SCOPE_FULL_PROJECT;
-        return Sets.immutableEnumSet(QualifiedContent.Scope.PROJECT);
+        return TransformManager.SCOPE_FULL_PROJECT;
     }
 
     //指明当前Transform是否支持增量编译
@@ -92,7 +92,7 @@ public class AOPTransform extends Transform {
                 File name = outputProvider.getContentLocation(jarName + md5Name, jarInput.getContentTypes(), jarInput.getScopes(), Format.JAR);
                 FileUtils.copyFile(jarInput.getFile(), name);
 //                System.out.println("transform jar: " + jarInput.getFile());
-                AOPInject.addJar(name.getAbsolutePath());
+                AOPInject.addJar(jarInput.getFile().getAbsolutePath());
             }
         }
     }
