@@ -127,8 +127,9 @@ public class AOPInject {
     }
 
     private static void createProxyMethod(CtClass ctClass, CtMethod ctMethod, Class annotation, String orName, String body) {
-        def newName = ctMethod.name + "\$\$" + annotation.simpleName
-        if (ctMethod.name.contains("\$\$") && newName.startsWith(ctMethod.name)) {
+        def newEnd = "\$\$" + annotation.simpleName;
+        def newName = ctMethod.name + newEnd
+        if (newName.contains(newEnd + newEnd)) {
             // 重复生成
             return
         }
