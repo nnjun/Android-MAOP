@@ -22,6 +22,7 @@ public class AOPInject {
 
     public static void addJar(String jar) {
         pool.appendClassPath(jar)
+        pool.clearImportedPackages()
     }
 
     public static void inject(String path, Project project) {
