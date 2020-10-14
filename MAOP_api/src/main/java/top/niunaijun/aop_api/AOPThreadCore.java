@@ -46,7 +46,7 @@ public class AOPThreadCore {
         public void runAsyncThread(final Class<?> clazz, final String method, Object target, final Object[] args, final String[] paramClazz) {
             final boolean staticV = target == null;
             final WeakReference<?> targetWeak = new WeakReference<>(target);
-            ArchTaskExecutor.getInstance().postToMainThread(new Runnable() {
+            ArchTaskExecutor.getInstance().executeOnAsync(new Runnable() {
                 @Override
                 public void run() {
                     call(clazz, method, targetWeak, args, paramClazz, staticV);
